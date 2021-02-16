@@ -9,7 +9,7 @@
 (use-foreign-library rocksdb)
 
 (defcfun ("rocksdb_options_create" create-options) :pointer)
-(defcfun ("rocksdb_options_destroy" destroy-options) :void (options :poi nter))
+(defcfun ("rocksdb_options_destroy" destroy-options) :void (options :pointer))
 (defcfun ("rocksdb_options_increase_parallelism" increase-parallelism) :void (opt :pointer) (total-threads :int))
 (defcfun ("rocksdb_options_optimize_level_style_compaction" optimize-level-style-compaction) :void (opt :pointer) (memtable_memory_budget :uint64))
 (defcfun ("rocksdb_options_set_create_if_missing" set-create-if-missing) :void (opt :pointer) (val :unsigned-char))

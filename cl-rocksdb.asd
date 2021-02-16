@@ -9,3 +9,10 @@
   :depends-on (#:cffi)
   :components ((:file "package")
                (:file "cl-rocksdb")))
+
+(asdf:defsystem #:cl-rocksdb/test
+  :serial t
+  :depends-on (#:cl-rocksdb #:fiveam)
+  :components ((:module "t"
+		:components ((:file "package")
+			     (:file "test")))))
