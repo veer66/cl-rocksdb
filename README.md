@@ -1,7 +1,11 @@
 # cl-rocksdb
-### _Your Name <your.name@example.com>_
+### _Vee Satayamas <5ssgdxltv@relay.firefox.com>_
 
-This is a project to do ... something.
+RocksDB binding for Common Lisp
+
+## Status
+
+Experimental
 
 ## License
 
