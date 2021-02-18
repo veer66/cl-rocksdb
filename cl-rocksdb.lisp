@@ -75,7 +75,6 @@
     (setq opt (create-writeoptions)))
   (let ((errptr (foreign-alloc :pointer)))
     (setf (mem-ref errptr :pointer) (null-pointer))
-    (format t "PRE-ERR = ~A~%" (mem-ref errptr :pointer))
     (put* db
 	  opt
 	  (static-vectors:static-vector-pointer key)
@@ -85,7 +84,6 @@
 	  errptr)
     (let ((err (mem-ref errptr :pointer)))
       (unless (null-pointer-p err)
-	(format t "ERR = ~A~%" err)
 	(error 'unable-to-put-key-value-to-db
 	       :db db
 	       :key key
