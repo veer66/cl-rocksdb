@@ -13,5 +13,14 @@
 	   #:destroy-readoptions
 	   #:open-db
 	   #:close-db
+	   #:cancel-all-background-work
 	   #:put-kv
-	   #:get-kv))
+	   #:get-kv
+	   #:create-iter
+	   #:destroy-iter
+	   #:move-iter-to-first
+	   #:move-iter-forward
+	   #:move-iter-backword
+	   #:valid-iter-p
+	   #:iter-key
+	   #:iter-value))
