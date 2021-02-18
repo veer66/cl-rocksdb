@@ -62,5 +62,32 @@
 	(cancel-all-background-work db t)
 	(close-db db)))))
 
+(test basic-macro
+  "basic macro with-*"
+  (let ((opt (create-options)))
+    (set-create-if-missing opt t)
+    (static-vectors:with-static-vectors ((k1 3 :element-type '(unsigned-byte 8)
+					     :initial-contents '(1 2 3))
+					 (v1 3 :element-type '(unsigned-byte 8)
+					       :initial-contents '(10 20 30))
+					 (k2 1 :element-type '(unsigned-byte 8)
+					       :initial-contents '(100))
+					 (v2 1 :element-type '(unsigned-byte 8)
+					       :initial-contents '(200)))
+      (with-open-db (db "/tmp/rock-with" opt)
+	(put-kv db k1 v1)
+	(put-kv db k2 v2)
+
+	(with-iter (iter db)
+	  (move-iter-to-first iter)
+	  (is (equal '(1 2 3) (coerce (iter-key iter) 'list)))
+	  (is (equal '(10 20 30) (coerce (iter-value iter) 'list)))
+	  (is (valid-iter-p iter))
+	  (move-iter-forward iter)
+	  (is (equal '(100) (coerce (iter-key iter) 'list)))
+	  (is (equal '(200) (coerce (iter-value iter) 'list)))
+	  (is (valid-iter-p iter))
+	  (move-iter-forward iter)
+	  (is (not (valid-iter-p iter))))))))
 
 (run! 'low-level-suite)

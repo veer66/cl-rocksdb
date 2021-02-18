@@ -142,3 +142,13 @@
     (setf (mem-ref len-ptr :unsigned-int) 0)
     (let ((value-ptr (iter-value* iter len-ptr)))
       (pointer-to-static-octets value-ptr (mem-ref len-ptr :unsigned-int)))))
+
+(defmacro with-open-db ((db-var db-path &optional opt) &body body)
+  `(let ((,db-var (open-db ,db-path ,opt)))
+     ,@body
+     (close-db ,db-var)))
+
+(defmacro with-iter ((iter-var db &optional opt) &body body)
+  `(let ((,iter-var (create-iter ,db ,opt)))
+     ,@body
+     (destroy-iter ,iter-var)))

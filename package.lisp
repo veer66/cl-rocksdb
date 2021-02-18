@@ -23,4 +23,6 @@
 	   #:move-iter-backword
 	   #:valid-iter-p
 	   #:iter-key
-	   #:iter-value))
+	   #:iter-value
+	   #:with-open-db
+	   #:with-iter))
