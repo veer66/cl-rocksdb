@@ -12,7 +12,7 @@
 (defcfun ("rocksdb_options_destroy" destroy-options) :void (options :pointer))
 (defcfun ("rocksdb_options_increase_parallelism" increase-parallelism) :void (opt :pointer) (total-threads :int))
 (defcfun ("rocksdb_options_optimize_level_style_compaction" optimize-level-style-compaction) :void (opt :pointer) (memtable_memory_budget :uint64))
-(defcfun ("rocksdb_options_set_create_if_missing" set-create-if-missing) :void (opt :pointer) (val :unsigned-char))
+(defcfun ("rocksdb_options_set_create_if_missing" set-create-if-missing) :void (opt :pointer) (val :boolean))
 
 (defcfun ("rocksdb_writeoptions_create" create-writeoptions) :pointer)
 (defcfun ("rocksdb_writeoptions_destroy" destroy-writeoptions) :void (opt :pointer))
@@ -30,3 +30,90 @@
 (defcfun ("rocksdb_iter_valid" valid?) :boolean (iter :pointer))
 (defcfun ("rocksdb_iter_next" move-next) :void (iter :pointer))
 (defcfun ("rocksdb_iter_prev" move-prev) :void (iter :pointer))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-condition unable-to-open-db (error)
+  ((db-path :initarg :db-path
+	    :reader db-path)
+   (error-message :initarg :error-message
+		  :reader error-message)))
+
+(define-condition unable-to-put-key-value-to-db (error)
+  ((db :initarg :db
+       :reader db)
+   (key :initarg :key
+	:reader key)
+   (val :initarg :val
+	:reader val)
+   (error-message :initarg :error-message
+		  :reader error-message)))
+
+(define-condition unable-to-get-value-to-db (error)
+  ((db :initarg :db
+       :reader db)
+   (key :initarg :key
+	:reader key)
+   (error-message :initarg :error-message
+		  :reader error-message)))
+
+(defun open-db (db-path &optional opt)
+  (unless opt
+    (setq opt (create-options)))
+  (let ((errptr (foreign-alloc :pointer)))
+    (setf (mem-ref errptr :pointer) (null-pointer))
+    (let* ((db (open-db* opt db-path errptr))
+	   (err (mem-ref errptr :pointer)))
+      (unless (null-pointer-p err)
+	(error 'unable-to-open-db
+	       :db-path db-path
+	       :error-message (foreign-string-to-lisp err)))
+      db)))
+
+(defun put-kv (db key val &optional opt)
+  (unless opt
+    (setq opt (create-writeoptions)))
+  (let ((errptr (foreign-alloc :pointer)))
+    (setf (mem-ref errptr :pointer) (null-pointer))
+    (format t "PRE-ERR = ~A~%" (mem-ref errptr :pointer))
+    (put* db
+	  opt
+	  (static-vectors:static-vector-pointer key)
+	  (length key)
+	  (static-vectors:static-vector-pointer val)
+	  (length val)
+	  errptr)
+    (let ((err (mem-ref errptr :pointer)))
+      (unless (null-pointer-p err)
+	(format t "ERR = ~A~%" err)
+	(error 'unable-to-put-key-value-to-db
+	       :db db
+	       :key key
+	       :val val
+	       :error-message (foreign-string-to-lisp err))))))
+
+(defun get-kv (db key &optional opt)
+  (unless opt
+    (setq opt (create-readoptions)))
+  (let ((errptr (foreign-alloc :pointer))
+	(val-len-ptr (foreign-alloc :unsigned-int)))
+    (setf (mem-ref errptr :pointer) (null-pointer))
+    (let ((val (get* db
+		     opt
+		     (static-vectors:static-vector-pointer key)
+		     (length key)
+		     val-len-ptr
+		     errptr)))
+      (let ((err (mem-ref errptr :pointer)))
+	(unless (null-pointer-p err)
+	  (error 'unable-to-get-value-to-db
+		 :db db
+		 :key key
+		 :error-message (foreign-string-to-lisp err)))
+	
+	(let* ((val-len (mem-ref val-len-ptr :unsigned-int))
+	       (val-vec (static-vectors:make-static-vector val-len
+							   :element-type '(unsigned-byte 8)))
+	       (val-vec-ptr (static-vectors:static-vector-pointer val-vec)))
+	  (static-vectors:replace-foreign-memory val-vec-ptr val val-len)
+	  val-vec)))))
