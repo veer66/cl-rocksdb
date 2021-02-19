@@ -132,5 +132,25 @@
 	(move-iter-forward iter)
 	(is (not (valid-iter-p iter)))))))
 
+(test basic-loop
+  "basic string verion"
+  (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-loop/"))
+			       :if-does-not-exist :ignore
+			       :validate t)
+  (let ((opt (create-options)))
+    (set-create-if-missing opt t)
+    (with-open-db (db "/tmp/rock-loop" opt)
+      (put-kv-str db "A1" "B1")
+      (put-kv-str db "C" "D")
+      (cancel-all-background-work db t)
+      (with-iter (iter db)
+	(move-iter-to-first iter)
+	(let ((lst nil))
+	  (loop while (valid-iter-p iter)
+		do
+		   (setq lst (cons (iter-value-str iter)
+				   lst))
+		   (move-iter-forward iter))
+	  (is (equal '("D" "B1") lst)))))))
 
 (run! 'low-level-suite)
