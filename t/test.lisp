@@ -118,7 +118,7 @@
     (set-create-if-missing opt t)
     (with-open-db (db "/tmp/rock-string" opt)
       (put-kv-str db "A1" "B1")
-      (put-kv-str db "C" "D")
+      (put-kv-str db "C" "DX")
       (cancel-all-background-work db t)
       (with-iter (iter db)
 	(move-iter-to-first iter)
@@ -128,7 +128,7 @@
 	(move-iter-forward iter)
 	(is (valid-iter-p iter))
 	(is (equal (iter-key-str iter) "C"))
-	(is (equal (iter-value-str iter) "D"))
+	(is (equal (iter-value-str iter) "DX"))
 	(move-iter-forward iter)
 	(is (not (valid-iter-p iter)))))))
 

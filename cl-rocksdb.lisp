@@ -102,7 +102,7 @@
 					 :element-type '(unsigned-byte 8)
 					 :initial-contents key-octets)
 					(val-vec
-					 (length key-octets)
+					 (length val-octets)
 					 :element-type '(unsigned-byte 8)
 					 :initial-contents val-octets))
       (put-kv db key-vec val-vec opt))))
