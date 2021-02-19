@@ -15,7 +15,9 @@
 	   #:close-db
 	   #:cancel-all-background-work
 	   #:put-kv
+	   #:put-kv-str
 	   #:get-kv
+	   #:get-kv-str
 	   #:create-iter
 	   #:destroy-iter
 	   #:move-iter-to-first

@@ -94,6 +94,19 @@
 	       :val val
 	       :error-message (foreign-string-to-lisp err))))))
 
+(defun put-kv-str (db key val &optional opt)
+  (let ((key-octets (babel:string-to-octets key))
+	(val-octets (babel:string-to-octets val)))
+    (static-vectors:with-static-vectors ((key-vec
+					 (length key-octets)
+					 :element-type '(unsigned-byte 8)
+					 :initial-contents key-octets)
+					(val-vec
+					 (length key-octets)
+					 :element-type '(unsigned-byte 8)
+					 :initial-contents val-octets))
+      (put-kv db key-vec val-vec opt))))
+
 (defun get-kv (db key &optional opt)
   (unless opt
     (setq opt (create-readoptions)))
@@ -113,12 +126,25 @@
 		 :key key
 		 :error-message (foreign-string-to-lisp err)))
 	
-	(let* ((val-len (mem-ref val-len-ptr :unsigned-int))
-	       (val-vec (static-vectors:make-static-vector val-len
-							   :element-type '(unsigned-byte 8)))
-	       (val-vec-ptr (static-vectors:static-vector-pointer val-vec)))
-	  (static-vectors:replace-foreign-memory val-vec-ptr val val-len)
-	  val-vec)))))
+	(unless (null-pointer-p val)
+	  (let* ((val-len (mem-ref val-len-ptr :unsigned-int))
+		 (val-vec (static-vectors:make-static-vector val-len
+							     :element-type '(unsigned-byte 8)))
+		 (val-vec-ptr (static-vectors:static-vector-pointer val-vec)))
+	    (static-vectors:replace-foreign-memory val-vec-ptr val val-len)
+	    val-vec))))))
+
+(defun get-kv-str (db key &optional opt)
+  (let ((key-octets (babel:string-to-octets key)))
+    (static-vectors:with-static-vectors ((key-vec
+					 (length key-octets)
+					 :element-type '(unsigned-byte 8)
+					 :initial-contents key-octets))
+      (let ((val-vec (get-kv db key-vec opt)))
+	(when val-vec
+	  (let ((val-str (babel:octets-to-string val-vec)))
+	    (static-vectors:free-static-vector val-vec)
+	    val-str))))))
 
 (defun create-iter (db &optional opt)
   (unless opt

@@ -12,7 +12,9 @@
   (static-vectors:with-static-vectors ((k 3 :element-type '(unsigned-byte 8)
 					    :initial-contents '(1 2 3))
 				       (v 3 :element-type '(unsigned-byte 8)
-					    :initial-contents '(10 20 30)))
+					    :initial-contents '(10 20 30))
+				       (k2 3 :element-type '(unsigned-byte 8)
+					     :initial-contents '(10 20 9)))
     (let ((opt (create-options)))
       (set-create-if-missing opt t)
       (let ((db (open-db "/tmp/rock-basic" opt)))
@@ -21,6 +23,7 @@
 	(let ((vv (get-kv db k)))
 	  (is (equal (coerce vv 'list) '(10 20 30)))
 	  (static-vectors:free-static-vector vv))
+	(is (null (get-kv db k2)))
 	(cancel-all-background-work db t)
 	(close-db db)))))
 
@@ -64,6 +67,9 @@
 
 (test basic-macro
   "basic macro with-*"
+  (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-with/"))
+			       :if-does-not-exist :ignore
+			       :validate t)
   (let ((opt (create-options)))
     (set-create-if-missing opt t)
     (static-vectors:with-static-vectors ((k1 3 :element-type '(unsigned-byte 8)
@@ -89,5 +95,18 @@
 	  (is (valid-iter-p iter))
 	  (move-iter-forward iter)
 	  (is (not (valid-iter-p iter))))))))
+
+(test basic-string-version
+  "basic string verion"
+  (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-string/"))
+			       :if-does-not-exist :ignore
+			       :validate t)
+  (let ((opt (create-options)))
+    (set-create-if-missing opt t)
+    (with-open-db (db "/tmp/rock-string" opt)
+      (put-kv-str db "A1" "B1")
+      (put-kv-str db "C" "D")
+      (is (equal "B1" (get-kv-str db "A1")))
+      (is (null (get-kv-str db "V1"))))))
 
 (run! 'low-level-suite)

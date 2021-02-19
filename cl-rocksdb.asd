@@ -6,7 +6,7 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:cffi #:static-vectors)
+  :depends-on (#:cffi #:static-vectors #:babel)
   :components ((:file "package")
                (:file "cl-rocksdb")))
 
