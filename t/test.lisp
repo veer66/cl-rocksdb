@@ -109,4 +109,28 @@
       (is (equal "B1" (get-kv-str db "A1")))
       (is (null (get-kv-str db "V1"))))))
 
+(test basic-iter-string
+  "basic string verion"
+  (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-string/"))
+			       :if-does-not-exist :ignore
+			       :validate t)
+  (let ((opt (create-options)))
+    (set-create-if-missing opt t)
+    (with-open-db (db "/tmp/rock-string" opt)
+      (put-kv-str db "A1" "B1")
+      (put-kv-str db "C" "D")
+      (cancel-all-background-work db t)
+      (with-iter (iter db)
+	(move-iter-to-first iter)
+	(is (valid-iter-p iter))
+	(is (equal (iter-key-str iter) "A1"))
+	(is (equal (iter-value-str iter) "B1"))
+	(move-iter-forward iter)
+	(is (valid-iter-p iter))
+	(is (equal (iter-key-str iter) "C"))
+	(is (equal (iter-value-str iter) "D"))
+	(move-iter-forward iter)
+	(is (not (valid-iter-p iter)))))))
+
+
 (run! 'low-level-suite)

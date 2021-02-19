@@ -163,11 +163,25 @@
     (let ((key-ptr (iter-key* iter klen-ptr)))
       (pointer-to-static-octets key-ptr (mem-ref klen-ptr :unsigned-int)))))
 
+(defun iter-key-str (iter)
+  (let ((key-vec (iter-key iter)))
+    (when key-vec
+	(let ((key-str (babel:octets-to-string key-vec)))
+	  (static-vectors:free-static-vector key-vec)
+	  key-str))))
+
 (defun iter-value (iter)
   (let ((len-ptr (foreign-alloc :unsigned-int)))
     (setf (mem-ref len-ptr :unsigned-int) 0)
     (let ((value-ptr (iter-value* iter len-ptr)))
       (pointer-to-static-octets value-ptr (mem-ref len-ptr :unsigned-int)))))
+
+(defun iter-value-str (iter)
+  (let ((val-vec (iter-value iter)))
+    (when val-vec
+	(let ((val-str (babel:octets-to-string val-vec)))
+	  (static-vectors:free-static-vector val-vec)
+	  val-str))))
 
 (defmacro with-open-db ((db-var db-path &optional opt) &body body)
   `(let ((,db-var (open-db ,db-path ,opt)))
