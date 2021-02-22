@@ -185,8 +185,8 @@
 
 (defmacro with-open-db ((db-var db-path &optional opt) &body body)
   `(let ((,db-var (open-db ,db-path ,opt)))
-     ,@body
-     (close-db ,db-var)))
+     (unwind-protect ,@body
+       (close-db ,db-var))))
 
 (defmacro with-iter ((iter-var db &optional opt) &body body)
   `(let ((,iter-var (create-iter ,db ,opt)))
