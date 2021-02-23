@@ -190,5 +190,5 @@
 
 (defmacro with-iter ((iter-var db &optional opt) &body body)
   `(let ((,iter-var (create-iter ,db ,opt)))
-     ,@body
-     (destroy-iter ,iter-var)))
+     (unwind-protect (progn ,@body)
+       (destroy-iter ,iter-var))))
