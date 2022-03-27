@@ -43,6 +43,10 @@
    (error-message :initarg :error-message
 		  :reader error-message)))
 
+(defmethod print-object ((obj unable-to-open-db) stream)
+  (print-unreadable-object (obj stream :type t :identity t)
+    (format stream "error-message=~A" (error-message obj))))
+
 (define-condition unable-to-put-key-value-to-db (error)
   ((db :initarg :db
        :reader db)
