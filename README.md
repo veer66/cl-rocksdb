@@ -21,6 +21,19 @@ RocksDB binding for Common Lisp
 		   (move-iter-forward iter))))))
 ```
 
+```Lisp
+(with-open-db (db "existing-db.rocks")
+    (with-iter (i db)
+      (move-iter-to-first i)
+      (loop while (valid-iter-p i)
+	    for v = (let ((v (iter-value-str i)))
+		      (move-iter-forward i)
+		      v)
+	    do
+	       (princ v)
+	       (terpri))))
+```
+
 ## Status
 
 Experimental
