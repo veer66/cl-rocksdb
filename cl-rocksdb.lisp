@@ -70,7 +70,10 @@
     (setq opt (create-options)))
   (let ((errptr (foreign-alloc :pointer)))
     (setf (mem-ref errptr :pointer) (null-pointer))
-    (let* ((db (open-db* opt db-path errptr))
+    (let* ((db-path (if (pathnamep db-path)
+			(namestring db-path)
+			db-path))
+	   (db (open-db* opt db-path errptr))
 	   (err (mem-ref errptr :pointer)))
       (unless (null-pointer-p err)
 	(error 'unable-to-open-db
