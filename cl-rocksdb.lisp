@@ -39,9 +39,9 @@
 
 (define-condition unable-to-open-db (error)
   ((db-path :initarg :db-path
-	    :reader db-path)
+            :reader db-path)
    (error-message :initarg :error-message
-		  :reader error-message)))
+                  :reader error-message)))
 
 (defmethod print-object ((obj unable-to-open-db) stream)
   (print-unreadable-object (obj stream :type t :identity t)
@@ -51,19 +51,19 @@
   ((db :initarg :db
        :reader db)
    (key :initarg :key
-	:reader key)
+        :reader key)
    (val :initarg :val
-	:reader val)
+        :reader val)
    (error-message :initarg :error-message
-		  :reader error-message)))
+                  :reader error-message)))
 
 (define-condition unable-to-get-value-to-db (error)
   ((db :initarg :db
        :reader db)
    (key :initarg :key
-	:reader key)
+        :reader key)
    (error-message :initarg :error-message
-		  :reader error-message)))
+                  :reader error-message)))
 
 (defun open-db (db-path &optional opt)
   (unless opt
@@ -71,14 +71,14 @@
   (let ((errptr (foreign-alloc :pointer)))
     (setf (mem-ref errptr :pointer) (null-pointer))
     (let* ((db-path (if (pathnamep db-path)
-			(namestring db-path)
-			db-path))
-	   (db (open-db* opt db-path errptr))
-	   (err (mem-ref errptr :pointer)))
+                        (namestring db-path)
+                        db-path))
+           (db (open-db* opt db-path errptr))
+           (err (mem-ref errptr :pointer)))
       (unless (null-pointer-p err)
-	(error 'unable-to-open-db
-	       :db-path db-path
-	       :error-message (foreign-string-to-lisp err)))
+        (error 'unable-to-open-db
+               :db-path db-path
+               :error-message (foreign-string-to-lisp err)))
       db)))
 
 (defun put-kv (db key val &optional opt)
@@ -87,71 +87,71 @@
   (let ((errptr (foreign-alloc :pointer)))
     (setf (mem-ref errptr :pointer) (null-pointer))
     (put* db
-	  opt
-	  (static-vectors:static-vector-pointer key)
-	  (length key)
-	  (static-vectors:static-vector-pointer val)
-	  (length val)
-	  errptr)
+          opt
+          (static-vectors:static-vector-pointer key)
+          (length key)
+          (static-vectors:static-vector-pointer val)
+          (length val)
+          errptr)
     (let ((err (mem-ref errptr :pointer)))
       (unless (null-pointer-p err)
-	(error 'unable-to-put-key-value-to-db
-	       :db db
-	       :key key
-	       :val val
-	       :error-message (foreign-string-to-lisp err))))))
+        (error 'unable-to-put-key-value-to-db
+               :db db
+               :key key
+               :val val
+               :error-message (foreign-string-to-lisp err))))))
 
 (defun put-kv-str (db key val &optional opt)
   (let ((key-octets (babel:string-to-octets key))
-	(val-octets (babel:string-to-octets val)))
+        (val-octets (babel:string-to-octets val)))
     (static-vectors:with-static-vectors ((key-vec
-					 (length key-octets)
-					 :element-type '(unsigned-byte 8)
-					 :initial-contents key-octets)
-					(val-vec
-					 (length val-octets)
-					 :element-type '(unsigned-byte 8)
-					 :initial-contents val-octets))
+                                          (length key-octets)
+                                          :element-type '(unsigned-byte 8)
+                                          :initial-contents key-octets)
+                                         (val-vec
+                                          (length val-octets)
+                                          :element-type '(unsigned-byte 8)
+                                          :initial-contents val-octets))
       (put-kv db key-vec val-vec opt))))
 
 (defun get-kv (db key &optional opt)
   (unless opt
     (setq opt (create-readoptions)))
   (let ((errptr (foreign-alloc :pointer))
-	(val-len-ptr (foreign-alloc :unsigned-int)))
+        (val-len-ptr (foreign-alloc :unsigned-int)))
     (setf (mem-ref errptr :pointer) (null-pointer))
     (let ((val (get* db
-		     opt
-		     (static-vectors:static-vector-pointer key)
-		     (length key)
-		     val-len-ptr
-		     errptr)))
+                     opt
+                     (static-vectors:static-vector-pointer key)
+                     (length key)
+                     val-len-ptr
+                     errptr)))
       (let ((err (mem-ref errptr :pointer)))
-	(unless (null-pointer-p err)
-	  (error 'unable-to-get-value-to-db
-		 :db db
-		 :key key
-		 :error-message (foreign-string-to-lisp err)))
-	
-	(unless (null-pointer-p val)
-	  (let* ((val-len (mem-ref val-len-ptr :unsigned-int))
-		 (val-vec (static-vectors:make-static-vector val-len
-							     :element-type '(unsigned-byte 8)))
-		 (val-vec-ptr (static-vectors:static-vector-pointer val-vec)))
-	    (static-vectors:replace-foreign-memory val-vec-ptr val val-len)
-	    val-vec))))))
+        (unless (null-pointer-p err)
+          (error 'unable-to-get-value-to-db
+                 :db db
+                 :key key
+                 :error-message (foreign-string-to-lisp err)))
+        
+        (unless (null-pointer-p val)
+          (let* ((val-len (mem-ref val-len-ptr :unsigned-int))
+                 (val-vec (static-vectors:make-static-vector val-len
+                                                             :element-type '(unsigned-byte 8)))
+                 (val-vec-ptr (static-vectors:static-vector-pointer val-vec)))
+            (static-vectors:replace-foreign-memory val-vec-ptr val val-len)
+            val-vec))))))
 
 (defun get-kv-str (db key &optional opt)
   (let ((key-octets (babel:string-to-octets key)))
     (static-vectors:with-static-vectors ((key-vec
-					 (length key-octets)
-					 :element-type '(unsigned-byte 8)
-					 :initial-contents key-octets))
+                                          (length key-octets)
+                                          :element-type '(unsigned-byte 8)
+                                          :initial-contents key-octets))
       (let ((val-vec (get-kv db key-vec opt)))
-	(when val-vec
-	  (let ((val-str (babel:octets-to-string val-vec)))
-	    (static-vectors:free-static-vector val-vec)
-	    val-str))))))
+        (when val-vec
+          (let ((val-str (babel:octets-to-string val-vec)))
+            (static-vectors:free-static-vector val-vec)
+            val-str))))))
 
 (defun create-iter (db &optional opt)
   (unless opt
@@ -160,7 +160,7 @@
 
 (defun pointer-to-static-octets (ptr len)
   (let* ((vec (static-vectors:make-static-vector len :element-type '(unsigned-byte 8)))
-	 (vec-ptr (static-vectors:static-vector-pointer vec)))
+         (vec-ptr (static-vectors:static-vector-pointer vec)))
     (static-vectors:replace-foreign-memory vec-ptr ptr len)
     vec))
 
@@ -173,9 +173,9 @@
 (defun iter-key-str (iter)
   (let ((key-vec (iter-key iter)))
     (when key-vec
-	(let ((key-str (babel:octets-to-string key-vec)))
-	  (static-vectors:free-static-vector key-vec)
-	  key-str))))
+      (let ((key-str (babel:octets-to-string key-vec)))
+        (static-vectors:free-static-vector key-vec)
+        key-str))))
 
 (defun iter-value (iter)
   (let ((len-ptr (foreign-alloc :unsigned-int)))
@@ -186,9 +186,9 @@
 (defun iter-value-str (iter)
   (let ((val-vec (iter-value iter)))
     (when val-vec
-	(let ((val-str (babel:octets-to-string val-vec)))
-	  (static-vectors:free-static-vector val-vec)
-	  val-str))))
+      (let ((val-str (babel:octets-to-string val-vec)))
+        (static-vectors:free-static-vector val-vec)
+        val-str))))
 
 (defmacro with-open-db ((db-var db-path &optional opt) &body body)
   `(let ((,db-var (open-db ,db-path ,opt)))
