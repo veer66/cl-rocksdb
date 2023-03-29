@@ -11,7 +11,9 @@
    #:create-block-based-options
    #:destroy-block-based-options
    #:set-block-based-options-block-cache
-   
+   #:set-block-based-options-cache-index-and-filter-blocks
+
+
    ;; OPTIONS
    #:create-options
    #:destroy-options

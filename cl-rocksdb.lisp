@@ -17,6 +17,8 @@
 (defcfun ("rocksdb_block_based_options_create" create-block-based-options) :pointer)
 (defcfun ("rocksdb_block_based_options_destroy" destroy-block-based-options) :void (options :pointer))
 (defcfun ("rocksdb_block_based_options_set_block_cache" set-block-based-options-block-cache) :void (options :pointer) (block-cache :pointer))
+(defcfun ("rocksdb_block_based_options_set_cache_index_and_filter_blocks" set-block-based-options-cache-index-and-filter-blocks) :void (options :pointer) (val :string))
+
 
 ;; Options
 (defcfun ("rocksdb_options_create" create-options) :pointer)

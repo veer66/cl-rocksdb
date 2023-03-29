@@ -158,6 +158,7 @@
   (let ((lru-cache (create-lru-cache (* 1024 1024 1024)))
 	(opt (create-options))
 	(table-options (create-block-based-options)))
+    (set-block-based-options-cache-index-and-filter-blocks table-options "true")
     (set-block-based-options-block-cache table-options lru-cache) 
     (set-block-based-table-factory-options opt table-options)
     (with-open-db (db "/tmp/rock-loop" opt)
