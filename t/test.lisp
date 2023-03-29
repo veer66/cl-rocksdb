@@ -150,4 +150,19 @@
                        (move-iter-forward iter))
               (is (equal '("D" "B1") lst)))))))
 
+(def-suite lru-cache-option-suite :description "Test adjusting block based options")
+(in-suite lru-cache-option-suite)
+
+(test resizing-lru-cache
+  "Test resizing LRU cache"
+  (let ((lru-cache (create-lru-cache (* 1024 1024 1024)))
+	(opt (create-options))
+	(table-options (create-block-based-options)))
+    (set-block-based-options-block-cache table-options lru-cache) 
+    (set-block-based-table-factory-options opt table-options)
+    (with-open-db (db "/tmp/rock-loop" opt)
+      (put-kv-str db "K1" "V1")
+      (is (equal "V1" (get-kv-str db "K1"))))))
+
 (run! 'low-level-suite)
+(run! 'lru-cache-option-suite)
