@@ -140,7 +140,7 @@
           (put-kv-str db "A1" "B1")
           (put-kv-str db "C" "D")
           (cancel-all-background-work db t)
-          (with-iter (iter db)
+	  (with-iter (iter db)
             (move-iter-to-first iter)
             (let ((lst nil))
               (loop while (valid-iter-p iter)
@@ -155,12 +155,16 @@
 
 (test resizing-lru-cache
   "Test resizing LRU cache"
+  (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-lru/"))
+			       :if-does-not-exist :ignore
+			       :validate t)
   (let ((lru-cache (create-lru-cache (* 1024 1024 1024)))
 	(opt (create-options))
 	(table-options (create-block-based-options)))
+    (set-create-if-missing opt t)
     (set-block-based-options-cache-index-and-filter-blocks table-options "true")
     (set-block-based-options-block-cache table-options lru-cache)
     (set-block-based-table-factory-options opt table-options)
-    (with-open-db (db "/tmp/rock-loop" opt)
+    (with-open-db (db "/tmp/rock-lru" opt)
       (put-kv-str db "K1" "V1")
       (is (equal "V1" (get-kv-str db "K1"))))))
