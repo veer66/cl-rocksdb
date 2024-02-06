@@ -1,9 +1,9 @@
 ;;;; cl-rocksdb.asd
 
 (asdf:defsystem #:cl-rocksdb
-  :description "Describe cl-rocksdb here"
-  :author "Your Name <your.name@example.com>"
-  :license  "Specify license here"
+  :description "RocksDB binding for Common Lisp"
+  :author "Vee Satayamas <vsatayamas@gmail.com>"
+  :license  "APACHE-2.0"
   :version "0.0.1"
   :serial t
   :depends-on (#:cffi #:babel)
