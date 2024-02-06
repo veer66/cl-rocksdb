@@ -164,6 +164,3 @@
     (with-open-db (db "/tmp/rock-loop" opt)
       (put-kv-str db "K1" "V1")
       (is (equal "V1" (get-kv-str db "K1"))))))
-
-(run! 'low-level-suite)
-(run! 'lru-cache-option-suite)

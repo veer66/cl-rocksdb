@@ -15,4 +15,11 @@
   :depends-on (#:cl-rocksdb #:fiveam #:uiop #:static-vectors)
   :components ((:module "t"
 		:components ((:file "package")
-			     (:file "test")))))
+			     (:file "test"))))
+  :perform (test-op (o s)
+		    (uiop:symbol-call :fiveam '#:run!
+				      (uiop:find-symbol* 'low-level-suite
+							 'cl-rocksdb/test))
+		    (uiop:symbol-call :fiveam '#:run!
+				      (uiop:find-symbol* 'lru-cache-option-suite
+							 'cl-rocksdb/test))))
