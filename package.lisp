@@ -6,7 +6,7 @@
    ;; LRU CACHE
    #:create-lru-cache
 
-   
+
    ;; BLOCK-BASED OPTIONS
    #:create-block-based-options
    #:destroy-block-based-options

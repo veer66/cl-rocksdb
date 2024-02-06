@@ -29,7 +29,7 @@
   "Test basic iter"
   (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-iter/"))
                                :if-does-not-exist :ignore
-                               :validate t)      
+                               :validate t)
   (let ((k1 (make-array 3 :element-type '(unsigned-byte 8)
                           :initial-contents '(1 2 3)) )
         (v1 (make-array 3 :element-type '(unsigned-byte 8)
@@ -159,7 +159,7 @@
 	(opt (create-options))
 	(table-options (create-block-based-options)))
     (set-block-based-options-cache-index-and-filter-blocks table-options "true")
-    (set-block-based-options-block-cache table-options lru-cache) 
+    (set-block-based-options-block-cache table-options lru-cache)
     (set-block-based-table-factory-options opt table-options)
     (with-open-db (db "/tmp/rock-loop" opt)
       (put-kv-str db "K1" "V1")

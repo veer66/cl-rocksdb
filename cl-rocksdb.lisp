@@ -160,7 +160,7 @@
                  :db db
                  :key key
                  :error-message (foreign-string-to-lisp err)))
-        
+
         (unless (null-pointer-p val)
           (let* ((val-len (mem-ref val-len-ptr :unsigned-int))
                  (val* (make-array val-len
