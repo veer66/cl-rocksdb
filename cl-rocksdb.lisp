@@ -35,6 +35,8 @@
 
 ;; Basic functions
 (defcfun ("rocksdb_open" open-db*) :pointer (opt :pointer) (name :string) (errptr :pointer))
+(defcfun ("rocksdb_open_for_read_only" open-db-for-read-only) :pointer (opt :pointer) (name :string)
+	 (error-if-wal-file-exists :unsigned-int) (errptr :pointer))
 (defcfun ("rocksdb_close" close-db) :void (opt :pointer))
 (defcfun ("rocksdb_cancel_all_background_work" cancel-all-background-work) :void (db :pointer) (wait :boolean))
 
@@ -82,7 +84,7 @@
    (error-message :initarg :error-message
                   :reader error-message)))
 
-(defun open-db (db-path &optional opt)
+(defun open-db (db-path &optional opt &key read-only error-if-wal-file-exists &allow-other-keys)
   (unless opt
     (setq opt (create-options)))
   (let ((errptr (foreign-alloc :pointer)))
@@ -90,7 +92,13 @@
     (let* ((db-path (if (pathnamep db-path)
                         (namestring db-path)
                         db-path))
-           (db (open-db* opt db-path errptr))
+           (db (if read-only
+		   (open-db-for-read-only opt db-path
+					  (if error-if-wal-file-exists
+					      1
+					      0)
+					  errptr)
+		   (open-db* opt db-path errptr)))
            (err (mem-ref errptr :pointer)))
       (unless (null-pointer-p err)
         (error 'unable-to-open-db
@@ -207,8 +215,15 @@
     (when #1#
       (babel:octets-to-string #1#))))
 
-(defmacro with-open-db ((db-var db-path &optional opt) &body body)
-  `(let ((,db-var (open-db ,db-path ,opt)))
+
+			 ;;&key (read-only nil) (error-if-wal-file-exists nil)
+			 ;;&allow-other-keys
+
+(defmacro with-open-db ((db-var db-path &optional opt
+			 &key read-only error-if-wal-file-exists &allow-other-keys)
+			&body body)
+  `(let ((,db-var (open-db ,db-path ,opt :read-only ,read-only
+					 :error-if-wal-file-exists ,error-if-wal-file-exists)))
      (unwind-protect (progn ,@body)
        (close-db ,db-var))))
 
