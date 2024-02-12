@@ -76,6 +76,13 @@
    (error-message :initarg :error-message
                   :reader error-message)))
 
+(defmethod print-object ((obj unable-to-put-key-value-to-db) stream)
+  (print-unreadable-object (obj stream :type t :identity t)
+    (format stream "~A~%KEY:~A~%VAL:~A~%"
+            (error-message obj)
+            (key obj)
+            (val obj))))
+
 (define-condition unable-to-get-value-to-db (error)
   ((db :initarg :db
        :reader db)
@@ -136,11 +143,13 @@
           errptr)
     (let ((err (mem-ref errptr :pointer)))
       (unless (null-pointer-p err)
-        (error 'unable-to-put-key-value-to-db
-               :db db
-               :key key
-               :val val
-               :error-message (foreign-string-to-lisp err))))))
+        (let ((msg (foreign-string-to-lisp err)))
+	  (print msg)
+	  (error 'unable-to-put-key-value-to-db
+		 :db db
+		 :key key
+		 :val val
+		 :error-message msg))))))
 
 (defun put-kv-str (db key val &optional opt)
   (let ((key-octets (babel:string-to-octets key))
