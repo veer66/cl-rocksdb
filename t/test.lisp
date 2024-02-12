@@ -25,6 +25,28 @@
       (cancel-all-background-work db t)
       (close-db db))))
 
+(test open-with-pathname
+      "Test basic scenario using CFFI"
+  (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-basic-p/"))
+                               :if-does-not-exist :ignore
+                               :validate t)
+  (let ((k (make-array 3 :element-type '(unsigned-byte 8)
+                         :initial-contents '(1 2 3)))
+        (v (make-array 3 :element-type '(unsigned-byte 8)
+                         :initial-contents '(10 20 30)))
+        (k2 (make-array 3 :element-type '(unsigned-byte 8)
+                          :initial-contents '(10 20 9)))
+        (opt (create-options)))
+    (set-create-if-missing opt t)
+    (let ((db (open-db #P"/tmp/rock-basic-p" opt)))
+      (destroy-options opt)
+      (put-kv db k v)
+      (let ((vv (get-kv db k)))
+        (is (equal (coerce vv 'list) '(10 20 30))))
+      (is (null (get-kv db k2)))
+      (cancel-all-background-work db t)
+      (close-db db))))
+
 (test basic-iter
   "Test basic iter"
   (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-iter/"))
