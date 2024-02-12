@@ -129,8 +129,8 @@
             (move-iter-forward iter)
             (is (not (valid-iter-p iter)))))))
 
-(test basic-loop
-      "basic string verion"
+(test basic-loop-with-read-only-open
+      "basic string verion with read-only open"
       (uiop:delete-directory-tree  (make-pathname :directory (pathname-directory #p"/tmp/rock-loop/"))
                                    :if-does-not-exist :ignore
                                    :validate t)
@@ -139,7 +139,10 @@
         (with-open-db (db "/tmp/rock-loop" opt)
           (put-kv-str db "A1" "B1")
           (put-kv-str db "C" "D")
-          (cancel-all-background-work db t)
+          (cancel-all-background-work db t))
+	(with-open-db (db "/tmp/rock-loop" opt :read-only t)
+	  (with-open-db (db "/tmp/rock-loop" opt :read-only t)
+	    "DO-NOTHING")
 	  (with-iter (iter db)
             (move-iter-to-first iter)
             (let ((lst nil))
