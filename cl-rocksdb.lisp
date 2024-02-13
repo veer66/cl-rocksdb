@@ -101,9 +101,7 @@
     (setq opt (create-options)))
   (let ((errptr (foreign-alloc :pointer)))
     (setf (mem-ref errptr :pointer) (null-pointer))
-    (let* ((db-path (if (pathnamep db-path)
-                        (namestring db-path)
-                        db-path))
+    (let* ((db-path (namestring (truename db-path)))
            (db (if read-only
 		   (open-db-for-read-only opt db-path
 					  (if error-if-wal-file-exists
