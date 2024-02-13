@@ -42,7 +42,7 @@
    #:destroy-iter
    #:move-iter-to-first
    #:move-iter-forward
-   #:move-iter-backword
+   #:move-iter-backward
    #:valid-iter-p
    #:iter-key
    #:iter-key-str
