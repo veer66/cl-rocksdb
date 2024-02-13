@@ -54,13 +54,18 @@
 (defcfun ("rocksdb_iter_key" iter-key*) :pointer (iter :pointer) (klen-ptr :pointer))
 (defcfun ("rocksdb_iter_value" iter-value*) :pointer (iter :pointer) (vlen-ptr :pointer))
 
+
+;; Property
+(defcfun ("rocksdb_property_value" property-value*) :pointer (db :pointer) (propname :string))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-condition unable-to-open-db (error)
-  ((db-path :initarg :db-path
-            :reader db-path)
-   (error-message :initarg :error-message
-                  :reader error-message)))
+		  ((db-path :initarg :db-path
+			    :reader db-path)
+		   (error-message :initarg :error-message
+				  :reader error-message)))
 
 (defmethod print-object ((obj unable-to-open-db) stream)
   (print-unreadable-object (obj stream :type t :identity t)
@@ -240,3 +245,10 @@
   `(let ((,iter-var (create-iter ,db ,opt)))
      (unwind-protect (progn ,@body)
        (destroy-iter ,iter-var))))
+
+(defun property-value (db propname)
+  (let ((raw-val (property-value* db propname)))
+    (unless (null-pointer-p raw-val)
+      (let ((val (foreign-string-to-lisp raw-val)))
+	(foreign-free raw-val)
+	val))))

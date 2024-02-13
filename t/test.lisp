@@ -193,3 +193,22 @@
     (with-open-db (db "/tmp/rock-lru" opt)
       (put-kv-str db "K1" "V1")
       (is (equal "V1" (get-kv-str db "K1"))))))
+
+
+(def-suite property-suite :description "Test property-related functions")
+(in-suite property-suite)
+
+(test get-estimating-count-property
+      "Test get estimating count property"
+      (let ((db-pathname #p"/tmp/rock-property-estimate-num/")
+	    (opt (create-options)))
+	(set-create-if-missing opt t)
+	(uiop:delete-directory-tree db-pathname
+				    :if-does-not-exist :ignore
+				    :validate t)
+	(with-open-db (db db-pathname opt)
+	  (put-kv-str db "K1" "V1")
+	  (cancel-all-background-work db t))
+	(with-open-db (db db-pathname nil :read-only t)
+	  (is (equal (property-value db "rocksdb.estimate-num-keys")
+		     "1")))))

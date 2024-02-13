@@ -22,4 +22,7 @@
 							 'cl-rocksdb/test))
 		    (uiop:symbol-call :fiveam '#:run!
 				      (uiop:find-symbol* 'lru-cache-option-suite
+							 'cl-rocksdb/test))
+		    (uiop:symbol-call :fiveam '#:run!
+				      (uiop:find-symbol* 'property-suite
 							 'cl-rocksdb/test))))
