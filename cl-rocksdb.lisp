@@ -247,6 +247,4 @@
 (defun property-value (db propname)
   (let ((raw-val (property-value* db propname)))
     (unless (null-pointer-p raw-val)
-      (let ((val (foreign-string-to-lisp raw-val)))
-	(foreign-free raw-val)
-	val))))
+      (foreign-string-to-lisp raw-val))))
