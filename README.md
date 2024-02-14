@@ -70,6 +70,10 @@ EX-READ-ONLY> (with-open-db (db #P"/tmp/rock-ex-read-only" nil :read-only t)
 "VAL-1"
 ```
 
+## Example applications
+
+* DuHin - yet another RocksDB browser [codeberg.org/veer66/duhin](https://codeberg.org/veer66/duhin)
+
 ## Status
 
 Alpha
